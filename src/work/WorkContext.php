@@ -1,3 +1,4 @@
+<?php
 /*
  * The MIT License
  *
@@ -21,33 +22,32 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  */
-package org.jeasy.flows.engine;
+
 
 /**
- * Main entry point to create {@link WorkFlowEngine} instances.
+ * Work execution context. This can be used to pass initial parameters to the
+ * workflow and share data between work units.
  *
  * @author Mahmoud Ben Hassine (mahmoud.benhassine@icloud.com)
  */
-public class WorkFlowEngineBuilder {
+class WorkContext {
 
-    /**
-     * Create a new {@link WorkFlowEngineBuilder}.
-     * 
-     * @return a new {@link WorkFlowEngineBuilder}.
-     */
-    public static WorkFlowEngineBuilder aNewWorkFlowEngine() {
-        return new WorkFlowEngineBuilder();
-    }
+	private final Map<String, Object> context = new ConcurrentHashMap<>();
 
-    private WorkFlowEngineBuilder() {
-    }
+	public void put(String key, Object value) {
+		context.put(key, value);
+	}
 
-    /**
-     * Create a new {@link WorkFlowEngine}.
-     * 
-     * @return a new {@link WorkFlowEngine}.
-     */
-    public WorkFlowEngine build() {
-        return new WorkFlowEngineImpl();
-    }
+	public Object get(String key) {
+		return context.get(key);
+	}
+
+	public Set<Map.Entry<String, Object>> getEntrySet() {
+		return context.entrySet();
+	}
+
+	@Override
+	public String toString() {
+		return "context=" + context + '}';
+	}
 }

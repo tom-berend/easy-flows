@@ -1,3 +1,5 @@
+<?php
+
 /*
  * The MIT License
  *
@@ -21,17 +23,39 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
  */
-package org.jeasy.flows.workflow;
 
-abstract class AbstractWorkFlow implements WorkFlow {
 
-    private final String name;
+/**
+ * This interface represents a unit of work. Implementations of this interface must:
+ *
+ * <ul>
+ *     <li>catch any checked or unchecked exceptions and return a {@link WorkReport}
+ *     instance with a status of {@link WorkStatus#FAILED} and a reference to the exception</li>
+ *     <li>make sure the work is finished in a finite amount of time</li>
+ * </ul>
+ *
+ * Work name must be unique within a workflow definition.
+ *
+ * @author Mahmoud Ben Hassine (mahmoud.benhassine@icloud.com)
+ */
 
-    AbstractWorkFlow(String name) {
-        this.name = name;
+
+    /**
+     * The name of the unit of work. The name must be unique within a workflow definition.
+     *
+     * @return name of the unit of work.
+     */
+    public function getName():string {
+        return strval(uniqid);
     }
 
-    public String getName() {
-        return name;
-    }
+    /**
+     * Execute the unit of work and return its report. Implementations are required
+     * to catch any checked or unchecked exceptions and return a {@link WorkReport} instance
+     * with a status of {@link WorkStatus#FAILED} and a reference to the exception.
+     *
+     * @param workContext context in which this unit of work is being executed
+     * @return the execution report
+     */
+    WorkReport execute(WorkContext workContext);
 }
