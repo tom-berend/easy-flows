@@ -5,9 +5,9 @@
 This is based on the wonderfully intuitive **Easy-Flow** package at [j-easy/easy-flows](https://github.com/j-easy/easy-flows) but with the following differences:
 
 - PHP (of course)
-- workflows stored in json files
-- support for workflow overloading
-- no thread operations, just script orchestration
+- workflows stored in json files (so users can edit them)
+- support for workflow overloading (so specific flows can override general flows)
+- just script orchestration (because PHP)
 
 
 
@@ -68,7 +68,24 @@ class PrintMessage extends WorkUnitEngine implements WorkUnit
 }
 ```
 
-'Context'is just a PHP associative array.  The workunit is initialized with some fields ($workUnitContext) and the workflow may pass in different information ($workFlowContext).  The workunit might update the workflow context for some subsequent workunit.
+So maybe it's a workflow to check whether a client's new order has exceeded their credit limit. The first step gets the client's profile and credit limit, and loads it into the context array.  The second step adds open (unpaid) invoices.  The third step adds all open (unbilled) orders in progress.  The fourth step does the calculations, and the fifth step either puts a hold on the order or releases it.
+
+But we have a slightly different workflow for our ten best customers, we release the workorder but notify the credit manager.
+
+And we have a related company. We ALWAYS release their workorders.
+
+There are three types of components here.
+
+- 'Context' is a PHP associative array.  It is typically created by the first 'Step' and updated by subsequent steps.
+- 'Steps' are PHP code, they know how to access databases, send emails, and do complex calculations on the Context.
+- 'Workflow' are JSON files
+
+
+'Context'is just a PHP associative array.  The workunit is initialized the ($workFlowContext) array, and each step ('workunit') of the workflow may update the workflow context for some subsequent workunit.
+
+
+
+
 
 
 Let's suppose we want to create the following workflow:
@@ -82,6 +99,8 @@ This workflow can be illustrated as follows:
 <p align="center">
     <img src="https://raw.githubusercontent.com/wiki/j-easy/easy-flows/images/easy-flows-example.png" width="70%">
 </p>
+
+t text](http://url/to/img.png)
 
 * `flow1` is a `RepeatFlow` of `work1` which is printing "foo" three times
 * `flow2` is a `ParallelFlow` of `work2` and `work3` which respectively print "hello" and "world" in parallel
@@ -98,25 +117,26 @@ With Easy Flows, this workflow can be implemented with the following JSON string
         "$work3": [ "PrintMessage",  { "message": "world"  }  ],
         "$work4": [ "PrintMessage",  { "message": "done"  }  ]
     },
-    "repeatFlow": {
-        "named": "print foo 3 times",
-        "repeat": "$work1",
-        "times": 3,
-        "then": "conditionalFlow"
+    "flow4": {
+        "comment": "run flow1 and then run flow3",
+        "launch": "flow1",
+        "launch": "flow3",
     },
-    "parallelFlow": {
-        "named": "print 'hello' and 'world' in parallel",
-        "execute": [ "$work2", "$work3" ]
+    "flow1": {
+        "comment": "call $work1 three times (print foo 3 times) then...",
+        "repeat": ["$work1",3],
+        "launch": "flow3"
     },
-    "conditionalFlow": {
-        "then": "parallelFlow",
-        "named": "run parallelFlow again and then print 'done'",
+    "flow2": {
+        "comment": "run $work2 and $work3 (parallel flow)'",
+        "execute": [ "$work2", "$work3" ],
+    },
+    "flow3"{
+        "comment": "run flow2, then test something and run W4 or W5",
+        "launch": "flow2"
         "when": "Completed",
-        "execute": "$work4"
-    },
-    "sequentialFlow": {
-        "named": "run repeatFlow and then run conditionalFlow",
-        "then": "conditionalFlow"
+        "if" : ["isGood", "$work2"],
+        "ifnot": ["isGood","$work3"],
     }
 }
 
