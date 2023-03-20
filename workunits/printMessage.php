@@ -1,7 +1,7 @@
 <?php
 
 
-class PrintMessage extends WorkUnitEngine implements WorkUnit
+class PrintMessage implements IWorkUnit
 {
     public array $workUnitContext = [];
 
@@ -10,7 +10,6 @@ class PrintMessage extends WorkUnitEngine implements WorkUnit
         if (!isset($context['message']))
             throw new Exception("PrintMessage workunit requires a message'");
 
-        $this->registerWorkUnit($this);
         $this->workUnitContext = $workUnitContext;  // just saving it
     }
 

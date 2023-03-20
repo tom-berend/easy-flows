@@ -1,0 +1,18 @@
+flow4: # run flow1 and then run flow3"
+- {completed:false} # set $context['completed'] to false
+- {repeatcount:3} # set $context ['repeatcount'] to 3
+- ^flow1 # run flow1 then
+- ^flow3 # run flow3
+---
+flow1: # call work1 three times (print foo 3 times) then run flow3
+- $work1:repeatcount        # could have been $work1:3
+- ^flow3
+---
+flow2: # run $work2 and $work3'",
+- $work2
+- $work3
+---
+flow3: # run flow2, then test something and run $work4,
+- ^flow2
+- if {completed, true,$work2}
+- if {completed,false,$work3}

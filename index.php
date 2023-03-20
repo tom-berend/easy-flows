@@ -4,6 +4,8 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 echo 'Test runner for easy-flow<br><br>';
+
+
 // define('CONTEXT_SYSTEM', 10);
 // define('CONTEXT_USER', 30);
 // define('CONTEXT_COURSECAT', 40);
@@ -18,9 +20,39 @@ echo 'Test runner for easy-flow<br><br>';
 $GLOBALS['debugMode']=true;
 $GLOBALS['printNiceCapture'] = '';
 $GLOBALS['errorString'] = '';
-require_once('../../moodle/mod/mathcode/coursebuilder/unittest.php');
+require_once('src/unittest.php');
 require_once('../../moodle/mod/mathcode/coursebuilder/utilities.php');
-require_once('src/engine/WorkFlowEngine.php');
+require_once('src/workFlowEngine.php');
+
+require_once('src/miniyaml.php');
+require_once('src/testminiyaml.php');
+
+
+$o = new TestMiniYaml();
+$o->runTests();
+echo $o->finalReport();
+
+////// baseball
+$datafile ='workflows/baseball.yaml';
+$data = file_get_contents($datafile);
+assertTrue($data,"could not read '$datafile'");
+printNice($data,'baseball before');
+
+$test = miniYAML::Load($data);
+printNice($test,'baseball after');
+
+
+//// test
+$datafile ='workflows/test.yaml';
+$data = file_get_contents($datafile);
+assertTrue($data,"could not read '$datafile'");
+printNice($data,'test before');
+
+$test = miniYAML::Load($data);
+printNice($test,'test.yaml after');
+die;
+
+
 
 // bring in the list of all possible workunits
 $GLOBALS['allWorkUnits'] = [];

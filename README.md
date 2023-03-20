@@ -7,7 +7,7 @@ This is based on the wonderfully intuitive **Easy-Flow** package at [j-easy/easy
 - PHP (of course)
 - workflows stored in json files (so users can edit them)
 - support for workflow overloading (so specific flows can override general flows)
-- just script orchestration (because PHP)
+- no parallelism, just script orchestration (because PHP)
 
 
 
@@ -29,34 +29,31 @@ This is based on the wonderfully intuitive **Easy-Flow** package at [j-easy/easy
 
 ## What is Easy Flows?
 
-Easy Flows is a workflow engine for PHP. It provides simple APIs and building blocks to make it easy to create and run composable, overloadable workflows.
+Easy Flows is a workflow engine for PHP, providing building blocks to create and run composable, overloadable workflows.
 
 
 <p align="center">
-    <img src="https://raw.githubusercontent.com/wiki/j-easy/easy-flows/images/easy-flows.png" width="70%">
+    <img src="https://communityreading.org/assets/easy-flows.png" width="70%">
 </p>
 
-Those are the only basic flows you need to know to start creating workflows with Easy Flows.
-You don't need to learn a complex notation or concepts, just a few natural APIs that are easy to think about.
+You don't need to learn a complex notation or concepts, these are the only flows that you need to think about.
 
 ## How does it work?
 
-A unit of work in Easy Flows is represented by the `WorkUnit` interface.  Let's write some work that prints a message to the webpage.
+A unit of work in Easy Flows is a PHP method represented by the `WorkUnit` interface.  Let's write some work that prints a message to the webpage.
 
 ```php
 <?php
 
+class WorkUnitEngine{
+    public array $workUnitContext = [];
+}
+
+
+
+
 class PrintMessage extends WorkUnitEngine implements WorkUnit
 {
-    public array $workUnitContext = [];
-
-    function __construct(array $workUnitContext) {
-        if (!isset($context['message']))
-            throw new Exception("PrintMessage workunit requires a message'");
-
-        $this->registerWorkUnit($this);
-        $this->workUnitContext = $workUnitContext;  // just saving it
-    }
 
     function getName(): string {
         return get_class($this);   // the name of this class
@@ -97,46 +94,57 @@ Let's suppose we want to create the following workflow:
 This workflow can be illustrated as follows:
 
 <p align="center">
-    <img src="https://raw.githubusercontent.com/wiki/j-easy/easy-flows/images/easy-flows-example.png" width="70%">
+    <img src="https://communityreading.org/assets/easy-flows-example.png" width="70%">
 </p>
 
-t text](http://url/to/img.png)
 
 * `flow1` is a `RepeatFlow` of `work1` which is printing "foo" three times
-* `flow2` is a `ParallelFlow` of `work2` and `work3` which respectively print "hello" and "world" in parallel
+* `flow2` is a `SequentialFlow` of `work2` and `work3` which respectively print "hello" and "world".  `work3` sets a flag to guide the workflow.
 * `flow3` is a `ConditionalFlow`. It first executes `flow2` (a workflow is also a work), then if `flow2` is completed, it executes `work4`, otherwise `work5` which respectively print "ok" and "nok"
 * `flow4` is a `SequentialFlow`. It executes `flow1` then `flow3` in sequence.
 
 With Easy Flows, this workflow can be implemented with the following JSON string:
 
+
+```php
+// I have created some methods ('workunits') in my workflow class.
+
+function work1(){ print 'foo';   }
+function work2(){ print 'hello'; }
+function work3(){ print 'world'; $this->context['completed']=true; }
+function work4(){ print 'done';   }
+
+```
+
+The `set` command assignes a value a value to the context array.  Of course the first workunit method could do that, but sometimes you want your users to be able
+to set parameter.
+
+Valid datatypes are strings, integers, and booleans
+
+
 ```json
 {
-    "define": {
-        "$work1": [ "PrintMessage",  { "message": "foo"  }  ],
-        "$work2": [ "PrintMessage",  { "message": "hello"  }  ],
-        "$work3": [ "PrintMessage",  { "message": "world"  }  ],
-        "$work4": [ "PrintMessage",  { "message": "done"  }  ]
-    },
     "flow4": {
         "comment": "run flow1 and then run flow3",
+        "set": ["completed",false],
+        "set": ["repeatcount",3],
         "launch": "flow1",
         "launch": "flow3",
     },
     "flow1": {
-        "comment": "call $work1 three times (print foo 3 times) then...",
-        "repeat": ["$work1",3],
+        "comment": "call work1 three times (print foo 3 times) then...",
+        "repeat": ["work1","repeatcount"],
         "launch": "flow3"
     },
     "flow2": {
         "comment": "run $work2 and $work3 (parallel flow)'",
-        "execute": [ "$work2", "$work3" ],
+        "execute": [ "work2", "work3" ],
     },
     "flow3"{
         "comment": "run flow2, then test something and run W4 or W5",
-        "launch": "flow2"
-        "when": "Completed",
-        "if" : ["isGood", "$work2"],
-        "ifnot": ["isGood","$work3"],
+        "launch": "flow2",
+        "if" : ["completed", true, "$work2"],
+        "if" : ["completed",false,"$work3"],
     }
 }
 

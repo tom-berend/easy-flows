@@ -8,7 +8,7 @@
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
  *  in the Software without restriction, including without limitation the rights
- *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *  to use, copy, modify, meremerge, publish, distribute, sublicense, and/or sell
  *  copies of the Software, and to permit persons to whom the Software is
  *  furnished to do so, subject to the following conditions:
  *
@@ -24,16 +24,29 @@
  *  THE SOFTWARE.
  */
 
-interface WorkUnit
+interface IWorkUnit
 {
     public function __construct(array $workUnitContext);
     public function getName(): string;
     public function run(array $workFlowContext);
 }
 
+class abstractWorkUnit
+{
+    function workReport()
+    {
+        // return "DefaultWorkReport {" +
+        //         "status=" + status +
+        //         ", context=" + workContext +
+        //         ", error=" + (error == null ? "''" : error) +
+        //         '}';
+    }
+}
+
 
 class WorkFlowEngine
 {
+    public $context = [];
 
     public $workflowJSON = '';
 
@@ -135,5 +148,3 @@ class WorkFlowEngine
         // printNice((workFlow.getName(),'Running workflow ');
     }
 }
-
-

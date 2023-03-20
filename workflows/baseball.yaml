@@ -1,0 +1,11 @@
+---
+flow1:
+  - Mark McGwire
+  - Sammy Sosa
+  - Ken Griffey
+flow2:
+  - Tom
+  - Tom
+
+Mark McGwire: { hr: 65, avg: 0.278 }
+Sammy Sosa: { hr: 63, avg: 0.288 }
