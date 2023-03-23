@@ -1,16 +1,32 @@
 # this is the test flow corresponding to the README.md file
 ---
 # initialize values, then run flow1 then run flow3
-flow4:
-- { completed: false, repeatcount: 3, $flow1:run, $flow2:run }
+Topic1: # name of the specific case
+  - case: topic = 1 # skip to next block if this fails
+
+  - set: # writes values to the context array
+      - completed: false # add comments where you like
+      - suggestion: "maybe review last years material first"
+
+  - if:
+    - test: a+b >0
+    - execute: $work1 # $w to remind us this is a php method
+    - run: flow1
+    - run: flow2
+
+  - set: # writes values to the context array
+      - completed: false # add comments where you like
+      - suggestion: "maybe review last years material first"
+
+  - foreach:
+    - load: aData  # expand context['aData']
+    - execute: $work2
 
 
-flow2:
-- if: topic = 1 and activity = 5
-- completed: false
-- repeatcount: 3
-- execute: $work1
-- repeat: $work1 repeatcount
-- run: flow1
-- run: flow2
 
+
+# add more-specific workflows ABOVE the default workflow
+default: # if we don't find anything more specific
+  - execute: $work1 # $w to remind us this is a php method
+  - run: flow1 # load flow1.yaml and run it
+  - run: flow2

@@ -26,11 +26,26 @@ require_once('src/workFlowEngine.php');
 
 require_once('src/miniyaml.php');
 require_once('src/testminiyaml.php');
+require_once('src/safeevalmath.php');
 
 
-$o = new TestMiniYaml();
+$o = new Scanner();
 $o->runTests();
+
+
+// $o = new SafeEvalMath();
+// $o->runTests();
+
+
+
+// $o = new TestMiniYaml();
+// $o->runTests();
+
+
 echo $o->finalReport();
+return;
+
+
 
 ////// baseball
 $datafile ='workflows/baseball.yaml';

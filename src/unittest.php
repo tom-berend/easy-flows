@@ -283,7 +283,7 @@ function assertTrue($assertion, $comment = "Assert Failed")
         // file_put_contents($GLOBALS['logfilename'], $errorText, FILE_APPEND);
 
         $GLOBALS['fails'] += 1;
-        $GLOBALS['errorString'] .= $errorString;
+        echo $errorString;
     }
     return ($assertion); // allows chained assertions
 }
