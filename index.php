@@ -26,7 +26,8 @@ require_once('src/workFlowEngine.php');
 
 require_once('src/miniyaml.php');
 require_once('src/testminiyaml.php');
-require_once('src/safeevalmath.php');
+require_once('src/safeeval.php');
+require_once('src/safeevalpredefined.php');
 
 
 $o = new Scanner();
